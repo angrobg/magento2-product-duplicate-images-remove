@@ -2,6 +2,7 @@
 
 namespace Magegadgets\RemoveDuplicateImage\Console;
 
+use Magento\Framework\App\ObjectManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,17 +19,17 @@ class Removeduplicate extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $objectManager = ObjectManager::getInstance();
 
         $app_state = $objectManager->get('\Magento\Framework\App\State');
         $app_state->setAreaCode('global');
         ini_set('memory_limit', '10240M');
         ini_set('max_execution_time', 0);
         set_time_limit(0);
-        $mediaApi = $objectManager->create('\Magento\Catalog\Model\Product\Gallery\Processor');
+//        $mediaApi = $objectManager->create('\Magento\Catalog\Model\Product\Gallery\Processor');
         $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
         $storeManager->setCurrentStore(0);
-        $mediaUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+//        $mediaUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
         $directoryList = $objectManager->get('\Magento\Framework\App\Filesystem\DirectoryList');
         $path = $directoryList->getPath('media');
         $productCollection = $objectManager->create('Magento\Catalog\Model\ResourceModel\Product\Collection');
@@ -37,8 +38,8 @@ class Removeduplicate extends Command
         $productRepository = $objectManager->get('\Magento\Catalog\Model\ProductRepository');
         $i = 0;
         $total = count($_products);
-        $count = 0;
-        $productCount = [];
+//        $count = 0;
+//        $productCount = [];
         foreach ($_products as $_prod) {
             $_product = $productRepository->getById($_prod->getId());
             $_product->setStoreId(0);
@@ -46,9 +47,9 @@ class Removeduplicate extends Command
             $base_image = $_product->getImage();
 
             if ($base_image != 'no_selection') {
-                $mediaUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
+//                $mediaUrl = $storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA);
                 $filepath = $path . '/catalog/product' . $base_image;
-                if (file_exists($filepath)) {
+                if (file_exists($filepath) && is_file($filepath)) {
                     $_md5_values[] = md5(file_get_contents($filepath));
                 }
                 $i++;
@@ -76,7 +77,7 @@ class Removeduplicate extends Command
                             }
                             unset($gallery[$key]);
                             echo "\r\n removed duplicate image from " . $_product->getSku();
-                            $count++;
+//                            $count++;
                         } else {
                             $_md5_values[] = $md5;
                         }
